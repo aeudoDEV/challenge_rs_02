@@ -1,5 +1,6 @@
-import react, { FormEvent } from 'react';
+import { FormEvent, useContext } from 'react';
 import Modal from 'react-modal';
+import { TransactionsContext } from '../../TransactionsContext'
 import {useState} from 'react';
 import { Container, TransactionTypeContainer, RadioBox } from './styles';
 import closeImg from '../../assets/close.svg';
@@ -13,15 +14,26 @@ interface NewTransactionModal {
 }
 
 export function NewTransactionModal({isOpen, onRequestClose}: NewTransactionModal){
+
+        const { createTransaction } = useContext(TransactionsContext);
         const [type, setType] = useState('deposit');
         const [title, setTitle] = useState('');
-        const [price, setPrice] = useState(0);
+        const [amount, setAmount] = useState(0);
         const [category, setCategory] = useState('');
-        function createNewTransaction(event: FormEvent){
-            event.preventDefault();
-            const data = {price, title, category, type};
-
-            api.post('/transactions', data)
+    async function createNewTransaction(event: FormEvent){
+            event.preventDefault(); 
+                   
+            await createTransaction({
+                title,
+                amount,
+                category,
+                type,
+            });
+            setTitle('');
+            setType('');
+            setAmount(0);
+            setCategory('');
+            onRequestClose();
         };
     return(
         <Modal 
@@ -40,8 +52,8 @@ export function NewTransactionModal({isOpen, onRequestClose}: NewTransactionModa
                     onChange={event => setTitle(event.target.value)}
                 />
                 <input type="number" placeholder="Price" 
-                    value={price}
-                    onChange={event => setPrice(Number(event.target.value))}
+                    value={amount}
+                    onChange={event => setAmount(Number(event.target.value))}
                 />
                 <TransactionTypeContainer>
                     <RadioBox 
